@@ -37,11 +37,26 @@ export GIT_SSH_COMMAND="ssh -i $KEY_FILE -o IdentitiesOnly=yes -o StrictHostKeyC
 git config user.name "mirror-bot"
 git config user.email "mirror-bot@users.noreply.local"
 
-git fetch --no-tags "$REMOTE_GH" "+refs/heads/$BRANCH:refs/remotes/$REMOTE_GH/$BRANCH"
-git fetch --no-tags "$REMOTE_GL" "+refs/heads/$BRANCH:refs/remotes/$REMOTE_GL/$BRANCH"
+git fetch --no-tags "$REMOTE_GH" "+refs/heads/$BRANCH:refs/remotes/$REMOTE_GH/$BRANCH" 2>/dev/null || true
+git fetch --no-tags "$REMOTE_GL" "+refs/heads/$BRANCH:refs/remotes/$REMOTE_GL/$BRANCH" 2>/dev/null || true
 
-GH_SHA="$(git rev-parse "refs/remotes/$REMOTE_GH/$BRANCH")"
-GL_SHA="$(git rev-parse "refs/remotes/$REMOTE_GL/$BRANCH")"
+GH_SHA="$(git rev-parse --verify -q "refs/remotes/$REMOTE_GH/$BRANCH" || true)"
+GL_SHA="$(git rev-parse --verify -q "refs/remotes/$REMOTE_GL/$BRANCH" || true)"
+
+if [[ -z "$GH_SHA" && -z "$GL_SHA" ]]; then
+  log "Ningun remoto tiene la rama $BRANCH todavia."
+  exit 0
+fi
+if [[ -z "$GL_SHA" ]]; then
+  log "GitLab no tiene $BRANCH; creandola desde GitHub."
+  git push "$REMOTE_GL" "$GH_SHA:refs/heads/$BRANCH"
+  exit 0
+fi
+if [[ -z "$GH_SHA" ]]; then
+  log "GitHub no tiene $BRANCH; creandola desde GitLab."
+  git push "$REMOTE_GH" "$GL_SHA:refs/heads/$BRANCH"
+  exit 0
+fi
 
 if [[ "$GH_SHA" == "$GL_SHA" ]]; then
   log "Ya sincronizados en $GH_SHA."
