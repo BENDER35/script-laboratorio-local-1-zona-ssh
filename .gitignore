@@ -1,0 +1,11 @@
+# Perfiles de laboratorio (pueden contener hosts/usuarios/rutas de claves)
+ssh_profiles.csv
+*.csv
+
+# Artefactos de compilación / paquetes
+bin/
+obj/
+build/
+dist/
+*.zip
+*.exe
