@@ -31,6 +31,9 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 .\ssh_connect.ps1
 ```
 
+### Windows (ejecutable .exe)
+Descarga `script-laboratorio-local-1-zona-ssh.exe` desde la pestaña Releases. Es un lanzador ligero: extrae el `.ps1` embebido a `%LOCALAPPDATA%\script-laboratorio-local-1-zona-ssh\` y lo abre con Windows PowerShell (incluido en Windows 10/11). No es una compilación nativa del script.
+
 ## Requisitos
 
 - Cliente: `ssh` (openssh-client / OpenSSH Client de Windows).
