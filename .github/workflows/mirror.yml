@@ -1,0 +1,34 @@
+name: Mirror bidireccional con GitLab
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: mirror-gitlab
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configurar remotos
+        run: |
+          git remote rename origin github
+          git remote add gitlab git@gitlab.com:BENDER_5000/script-laboratorio-local-1-zona-ssh.git
+
+      - name: Sincronizar
+        env:
+          SYNC_SSH_KEY: ${{ secrets.GITLAB_DEPLOY_KEY }}
+          SYNC_KNOWN_HOSTS: ${{ vars.GITLAB_KNOWN_HOSTS }}
+          SYNC_GH_TOKEN: ${{ github.token }}
+          SYNC_GH_REPO: ${{ github.repository }}
+        run: bash scripts/sync-mirrors.sh

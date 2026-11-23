@@ -1,0 +1,19 @@
+stages:
+  - sync
+
+variables:
+  GIT_DEPTH: "0"
+
+mirror-sync:
+  stage: sync
+  image: ubuntu:24.04
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git openssh-client ca-certificates >/dev/null
+    - git remote rename origin gitlab
+    - git remote add github git@github.com:BENDER35/script-laboratorio-local-1-zona-ssh.git
+  script:
+    - env SYNC_SSH_KEY="$GITHUB_DEPLOY_KEY" SYNC_KNOWN_HOSTS="$GITHUB_KNOWN_HOSTS" bash scripts/sync-mirrors.sh
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
